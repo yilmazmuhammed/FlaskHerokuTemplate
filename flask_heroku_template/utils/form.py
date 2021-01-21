@@ -1,3 +1,5 @@
+from json.decoder import JSONDecodeError
+
 from flask import json
 from flask_wtf import FlaskForm
 from werkzeug.datastructures import MultiDict
@@ -45,7 +47,20 @@ class MultiCheckboxField(SelectMultipleField):
     option_widget = widgets.CheckboxInput()
 
 
-def flask_form_to_dict(request_form: MultiDict, exclude=None, boolean_fields=None, json_fields=None):
+def custom_json_loads(string):
+    lines = string.split("\r\n")
+    ret = {}
+    for line in lines:
+        key, value = line.split(":")
+        if len(value.split(",")) > 1:
+            ret[key] = [v.strip() for v in value.split(",")]
+        else:
+            ret[key] = value.strip()
+    return ret
+
+
+def flask_form_to_dict(request_form: MultiDict, exclude=None, boolean_fields=None, json_fields=None,
+                       json_loads=custom_json_loads):
     if json_fields is None:
         json_fields = []
     if exclude is None:
@@ -66,7 +81,11 @@ def flask_form_to_dict(request_form: MultiDict, exclude=None, boolean_fields=Non
 
     for i in json_fields:
         if result.get(i):
-            result[i] = json.loads(result[i])
+            try:
+                result[i] = json.loads(result[i])
+            except JSONDecodeError as e:
+                print(type(e), "::", str(e))
+                result[i] = json_loads(result[i])
 
     result.pop('submit', None)
     result.pop('csrf_token', None)
