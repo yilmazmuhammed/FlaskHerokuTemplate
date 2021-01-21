@@ -1,5 +1,18 @@
+from flask import json
 from flask_wtf import FlaskForm
+from werkzeug.datastructures import MultiDict
 from wtforms import SelectMultipleField, widgets
+
+from flask_heroku_template.utils import LayoutPI
+
+
+class FormPI(LayoutPI):
+    def __init__(self, form, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.form = form
+        self.errors = []
+        for field in form:
+            self.errors += field.errors
 
 
 def form_open(form_name, f_id=None, enctype=None, f_action="", f_class="form-horizontal"):
@@ -30,3 +43,32 @@ class CustomFlaskForm(FlaskForm):
 class MultiCheckboxField(SelectMultipleField):
     widget = widgets.ListWidget(prefix_label=False)
     option_widget = widgets.CheckboxInput()
+
+
+def flask_form_to_dict(request_form: MultiDict, exclude=None, boolean_fields=None, json_fields=None):
+    if json_fields is None:
+        json_fields = []
+    if exclude is None:
+        exclude = []
+    if boolean_fields is None:
+        boolean_fields = []
+
+    result = {
+        key: request_form.getlist(key)[0] if len(request_form.getlist(key)) == 1 else request_form.getlist(key)
+        for key in request_form
+        if key not in exclude and not (len(request_form.getlist(key)) == 1 and request_form.getlist(key)[0] == "")
+    }
+    for i in boolean_fields:
+        if result.get(i):
+            result[i] = True
+        else:
+            result[i] = False
+
+    for i in json_fields:
+        if result.get(i):
+            result[i] = json.loads(result[i])
+
+    result.pop('submit', None)
+    result.pop('csrf_token', None)
+
+    return result
