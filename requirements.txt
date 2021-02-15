@@ -5,3 +5,4 @@ WTForms~=2.3.3
 pony~=0.7.14
 Werkzeug~=1.0.1
 psycopg2
+phonenumbers~=8.12.17

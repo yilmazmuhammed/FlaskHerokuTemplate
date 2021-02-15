@@ -1,9 +1,10 @@
 from json.decoder import JSONDecodeError
 
+import phonenumbers as phonenumbers
 from flask import json
 from flask_wtf import FlaskForm
 from werkzeug.datastructures import MultiDict
-from wtforms import SelectMultipleField, widgets
+from wtforms import SelectMultipleField, widgets, ValidationError
 
 from flask_heroku_template.utils import LayoutPI
 
@@ -91,3 +92,53 @@ def flask_form_to_dict(request_form: MultiDict, exclude=None, boolean_fields=Non
     result.pop('csrf_token', None)
 
     return result
+
+
+class PhoneNumberValidator(object):
+    """
+    Validates an phone number. Requires phonenumbers package to be
+    installed. For ex: pip install phonenumbers.
+
+    :param message:
+        Error message to raise in case of a validation error.
+    :param default_codes:
+        Uluslararası formatta doğrulanamazsa sırasıyla default_codes
+        içindeki ülke kodları girdinin başına eklenerek kontrol edilir.
+        (Default None)
+    :param granular_message:
+        Use validation failed message from email_validator library
+        (Default False).
+    """
+
+    def __init__(self, message=None, default_codes=None, granular_message=False, ):
+        if phonenumbers is None:
+            raise Exception("Install 'phonenumbers' for phone number validation support.")
+        if default_codes is None:
+            default_codes = []
+        self.default_codes = default_codes
+        if not message:
+            message = u'Telefon numaranızı başında "+" olarak uluslar arası telefon numarası formatında giriniz.'
+        self.message = message
+
+    def __call__(self, form, field):
+        # if len(field.data) > 16:
+        #     raise ValidationError(self.message+"\nTelefon numarası 16 karakterden uzun olamaz.")
+
+        trials = [field.data, "+" + field.data] + [code + field.data for code in self.default_codes]
+        print(trials)
+        for trial in trials:
+            try:
+                phone_number = phonenumbers.parse(trial)
+                if phonenumbers.is_valid_number(phone_number):
+                    # TODO field.data = "+" + phone_number.country_code + phone_number.national_number
+                    print("Geçerli:", phone_number)
+                    print(phone_number.country_code, phone_number.national_number)
+                    break
+                else:
+                    raise ValidationError(self.message, "\nTelefon numarası geçerli değil")
+            except phonenumbers.phonenumberutil.NumberParseException as e:
+                print("Doğrulanamıyor:", trial)
+                print(e)
+                pass
+        else:
+            raise ValidationError(self.message, "\nTelefon numarası doğrulanamıyor.")

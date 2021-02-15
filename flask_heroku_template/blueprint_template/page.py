@@ -9,7 +9,7 @@ blueprint_template_page_bp = Blueprint(
 
 
 @blueprint_template_page_bp.route('/example')
-def example_api():
+def example_page():
     # # Example for http://127.0.0.1:5000/blueprint_template/example?arg0=55&arg1=asd&arg1=qwe
     print("request.args:\t", request.args, "\n")
     for i in request.args:
