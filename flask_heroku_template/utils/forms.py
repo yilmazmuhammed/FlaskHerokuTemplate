@@ -1,21 +1,30 @@
 from json.decoder import JSONDecodeError
 
-import phonenumbers as phonenumbers
 from flask import json
 from flask_wtf import FlaskForm
 from werkzeug.datastructures import MultiDict
 from wtforms import SelectMultipleField, widgets, ValidationError
+from wtforms.validators import InputRequired, Length, NumberRange
+
+try:
+    import phonenumbers
+except ImportError:
+    phonenumbers = None
 
 from flask_heroku_template.utils import LayoutPI
 
 
 class FormPI(LayoutPI):
-    def __init__(self, form, *args, **kwargs):
+    def __init__(self, form, explanation=None, errors: list = None, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if not isinstance(errors, list):
+            errors = []
         self.form = form
-        self.errors = []
-        for field in form:
-            self.errors += field.errors
+        self.explanation = explanation
+        self.errors = errors
+        if self.form:
+            for field in self.form:
+                self.errors += field.errors
 
 
 def form_open(form_name, f_id=None, enctype=None, f_action="", f_class="form-horizontal"):
@@ -36,11 +45,21 @@ def form_close():
 
 
 class CustomFlaskForm(FlaskForm):
-    def __init__(self, form_title='Form', form_name='form', form_id='form', *args, **kwargs):
+    def __init__(self, form_title='Form', form_name='form', form_id='form', f_class="form-horizontal", f_action="",
+                 form_explanation=None, enctype=None, is_file_form=False, *args, **kwargs):
         self.form_title = form_title
-        self.open = form_open(form_name=form_name, f_id=form_id)
+        self.form_explanation = form_explanation
+        if not enctype and is_file_form:
+            enctype = "multipart/form-data"
+        self.open = form_open(form_name=form_name, f_id=form_id, f_class=f_class, enctype=enctype, f_action=f_action)
         self.close = form_close()
         super().__init__(*args, **kwargs)
+
+    def get_all_errors(self):
+        errors = []
+        for field in self:
+            errors += field.errors
+        return errors
 
 
 class MultiCheckboxField(SelectMultipleField):
@@ -60,8 +79,10 @@ def custom_json_loads(string):
     return ret
 
 
-def flask_form_to_dict(request_form: MultiDict, exclude=None, boolean_fields=None, json_fields=None,
-                       json_loads=custom_json_loads):
+def flask_form_to_dict(request_form: MultiDict, exclude=None, boolean_fields=None, default_values=None,
+                       json_fields=None, json_loads=custom_json_loads):
+    if default_values is None:
+        default_values = {}
     if json_fields is None:
         json_fields = []
     if exclude is None:
@@ -74,6 +95,10 @@ def flask_form_to_dict(request_form: MultiDict, exclude=None, boolean_fields=Non
         for key in request_form
         if key not in exclude and not (len(request_form.getlist(key)) == 1 and request_form.getlist(key)[0] == "")
     }
+
+    default_values.update(result)
+    result = default_values
+
     for i in boolean_fields:
         if result.get(i):
             result[i] = True
@@ -142,3 +167,15 @@ class PhoneNumberValidator(object):
                 pass
         else:
             raise ValidationError(self.message, "\nTelefon numarası doğrulanamıyor.")
+
+
+def input_required_validator(field):
+    return InputRequired("Lütfen %s giriniz" % (field.lower(),))
+
+
+def max_length_validator(field, max: int):
+    return Length(max=max, message="%s %s karakterden fazla olamaz." % (field.capitalize(), max))
+
+
+def min_number_validator(field, min: int):
+    return NumberRange(min=min, message="%s cannot be smaller than %s" % (field.capitalize(), min))
