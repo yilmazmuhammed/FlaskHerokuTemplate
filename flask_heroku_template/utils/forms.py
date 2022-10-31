@@ -80,20 +80,23 @@ def custom_json_loads(string):
 
 
 def flask_form_to_dict(request_form: MultiDict, exclude=None, boolean_fields=None, default_values=None,
-                       json_fields=None, json_loads=custom_json_loads):
+                       json_fields=None, json_loads=custom_json_loads, with_empty_fields=False):
     if default_values is None:
         default_values = {}
     if json_fields is None:
         json_fields = []
-    if exclude is None:
-        exclude = []
     if boolean_fields is None:
         boolean_fields = []
+    if exclude is None:
+        exclude = []
+    exclude += ["submit", "csrf_token"]
 
     result = {
         key: request_form.getlist(key)[0] if len(request_form.getlist(key)) == 1 else request_form.getlist(key)
         for key in request_form
-        if key not in exclude and not (len(request_form.getlist(key)) == 1 and request_form.getlist(key)[0] == "")
+        if key not in exclude and not (
+                not with_empty_fields and len(request_form.getlist(key)) == 1 and request_form.getlist(key)[0] == ""
+        )
     }
 
     default_values.update(result)
@@ -112,9 +115,6 @@ def flask_form_to_dict(request_form: MultiDict, exclude=None, boolean_fields=Non
             except JSONDecodeError as e:
                 print(type(e), "::", str(e))
                 result[i] = json_loads(result[i])
-
-    result.pop('submit', None)
-    result.pop('csrf_token', None)
 
     return result
 

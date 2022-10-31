@@ -44,3 +44,31 @@ def get_next_url(args, parameters={}, default_url=""):
     if next_url:
         next_url = add_parameters_to_url(next_url, parameters)
     return next_url
+
+
+def get_updated_fields(new_values, db_object):
+    ret = {}
+    old_values = db_object.to_dict()
+    for key, value in new_values.items():
+        if key in old_values.keys() and value != old_values[key]:
+            ret[key] = {"new": value, "old": old_values[key]}
+    return ret
+
+
+def set_parameters_of_url(url, parameters: dict):
+    url_args = []
+    if "?" in url:
+        args_part = url[url.find("?") + 1:]
+        url = url[:url.find("?")]
+        url_args = [a.split("=") for a in args_part.split("&")]
+    url += "?"
+
+    for key, value in url_args:
+        if key not in parameters.keys():
+            url += f"{key}={value}&"
+
+    for key, value in parameters.items():
+        url += f"{key}={value}&"
+
+    url = url[:-1]
+    return url
