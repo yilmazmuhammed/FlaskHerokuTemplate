@@ -178,4 +178,8 @@ def max_length_validator(field, max: int):
 
 
 def min_number_validator(field, min: int):
-    return NumberRange(min=min, message="%s cannot be smaller than %s" % (field.capitalize(), min))
+    return NumberRange(min=min, message="%s alanı %s değerinden küçük olamaz" % (field.capitalize(), min))
+
+
+def max_number_validator(field, max: int):
+    return NumberRange(max=max, message="%s alanı %s değerinden büyük olamaz" % (field.capitalize(), max))
