@@ -1,3 +1,4 @@
+import os
 from datetime import date, time, datetime
 
 from flask.json import JSONEncoder
@@ -12,14 +13,18 @@ class LayoutPI:
 
 
 class CustomJSONEncoder(JSONEncoder):
+    DATETIME_STR_FORMAT = os.getenv("DATETIME_STR_FORMAT", "%Y-%m-%d %H:%M:%S.%f")
+    DATE_STR_FORMAT = os.getenv("DATE_STR_FORMAT", "%Y-%m-%d")
+    TIME_STR_FORMAT = os.getenv("TIME_STR_FORMAT", "%H:%M")
+
     def default(self, obj):
         try:
             if isinstance(obj, datetime):
-                return obj.strftime("%Y-%m-%d %H:%M")
+                return obj.strftime(self.DATETIME_STR_FORMAT)
             elif isinstance(obj, date):
-                return obj.strftime("%Y-%m-%d")
+                return obj.strftime(self.DATE_STR_FORMAT)
             elif isinstance(obj, time):
-                return obj.strftime("%H:%M")
+                return obj.strftime(self.TIME_STR_FORMAT)
             iterable = iter(obj)
         except TypeError:
             pass
