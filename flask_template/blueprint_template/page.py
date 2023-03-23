@@ -1,8 +1,8 @@
 from flask import Blueprint, request, render_template, g, url_for, redirect
 
-from flask_heroku_template.blueprint_template import forms
-from flask_heroku_template.utils import LayoutPI
-from flask_heroku_template.utils.forms import flask_form_to_dict, FormPI
+from flask_template.blueprint_template import forms
+from flask_template.utils import LayoutPI
+from flask_template.utils.forms import flask_form_to_dict, FormPI
 
 blueprint_template_page_bp = Blueprint(
     'blueprint_template_page_bp', __name__,

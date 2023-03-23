@@ -1,6 +1,6 @@
 import os
 
-from flask_heroku_template.app import create_app
+from flask_template.app import create_app
 
 os.environ["PROJECT_DIRECTORY"] = os.path.dirname(__file__)
 

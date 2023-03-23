@@ -5,9 +5,9 @@ from flask import Flask
 from flask_jsglue import JSGlue
 from pony.flask import Pony
 
-from flask_heroku_template.blueprint_template.api import blueprint_template_api_bp
-from flask_heroku_template.blueprint_template.page import blueprint_template_page_bp
-from flask_heroku_template.utils import CustomJSONEncoder
+from flask_template.blueprint_template.api import blueprint_template_api_bp
+from flask_template.blueprint_template.page import blueprint_template_page_bp
+from flask_template.utils import CustomJSONEncoder
 
 os.environ["DATETIME_STR_FORMAT"] = "%Y-%m-%d %H:%M:%S.%f"
 os.environ["RUN_TIME"] = datetime.now().strftime(os.getenv("DATETIME_STR_FORMAT"))

@@ -1,6 +1,6 @@
 from wtforms import SubmitField
 
-from flask_heroku_template.utils.forms import CustomFlaskForm
+from flask_template.utils.forms import CustomFlaskForm
 
 
 class ExampleForm(CustomFlaskForm):

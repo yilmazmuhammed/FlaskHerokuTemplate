@@ -11,7 +11,7 @@ try:
 except ImportError:
     phonenumbers = None
 
-from flask_heroku_template.utils import LayoutPI
+from flask_template.utils import LayoutPI
 
 
 class FormPI(LayoutPI):

@@ -2,7 +2,7 @@ from functools import wraps
 
 from flask import request, g, redirect
 
-from flask_heroku_template.utils import set_parameters_of_url
+from flask_template.utils import set_parameters_of_url
 
 
 def paging_must_be_verified(default_page_num=1, default_page_size=50):
