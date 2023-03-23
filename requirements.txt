@@ -1,10 +1,10 @@
-Flask==2.2.2
+Flask==2.2.3
 Flask-JSGlue~=0.3.1
 Flask-WTF==1.1.1
 gunicorn
-Jinja2~=3.0.3
-phonenumbers==8.13.5
+Jinja2==3.1.2
+phonenumbers==8.13.7
 pony==0.7.16
 psycopg2-binary==2.9.5
-Werkzeug==2.2.2
+Werkzeug==2.2.3
 WTForms==3.0.1
