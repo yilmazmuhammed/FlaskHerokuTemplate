@@ -1,7 +1,7 @@
 import os
 from datetime import date, time, datetime
 
-from flask.json import JSONEncoder
+from json import JSONEncoder
 
 
 class LayoutPI:
