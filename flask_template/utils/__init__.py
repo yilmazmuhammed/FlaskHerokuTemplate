@@ -1,7 +1,9 @@
 import os
-from datetime import date, time, datetime
+from datetime import date, time, datetime, timedelta
 
 from json import JSONEncoder
+
+from flask import g
 
 
 class LayoutPI:
@@ -10,6 +12,7 @@ class LayoutPI:
 
     def __init__(self, title):
         self.title = title
+        g.now = tz_to_tr(datetime.now(), tz="UTC")
 
 
 class CustomJSONEncoder(JSONEncoder):
@@ -77,3 +80,8 @@ def set_parameters_of_url(url, parameters: dict):
 
     url = url[:-1]
     return url
+
+
+def tz_to_tr(coming_time, tz="utc"):
+    if tz.lower() == "utc":
+        return coming_time + timedelta(hours=3)

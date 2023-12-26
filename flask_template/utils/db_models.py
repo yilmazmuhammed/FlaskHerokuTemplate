@@ -21,7 +21,7 @@ def get_paging_variables(entities_query, page_size, page_num):
     return total_count, page_count, first_index, transactions
 
 
-DATABASE_PROVIDER = os.getenv("DATABASE_PROVIDER")
+DATABASE_PROVIDER = os.getenv("DATABASE_PROVIDER", "sqlite")
 
 if DATABASE_PROVIDER == "postgres":
     DATABASE_URL = os.getenv("DATABASE_URL")
@@ -32,9 +32,10 @@ elif DATABASE_PROVIDER == "mysql":
     DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
     DATABASE_DB = os.getenv("DATABASE_DB")
     db.bind(provider="mysql", host=DATABASE_HOST, user=DATABASE_USER, passwd=DATABASE_PASSWORD, db=DATABASE_DB)
-else:
+elif DATABASE_PROVIDER == "sqlite":
     db.bind(provider="sqlite", filename='database.sqlite', create_db=True)
-
+else:
+    raise Exception("There is no DATABASE_PROVIDER")
 
 db.generate_mapping(create_tables=True)
 
