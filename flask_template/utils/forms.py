@@ -53,6 +53,8 @@ class CustomFlaskForm(FlaskForm):
             enctype = "multipart/form-data"
         self.open = form_open(form_name=form_name, f_id=form_id, f_class=f_class, enctype=enctype, f_action=f_action)
         self.close = form_close()
+        # Database'de string halinde tutulan tür gibi alanlar için bağlı alanlar belirtiliyor
+        self.linked_fields = []
         super().__init__(*args, **kwargs)
 
     def get_all_errors(self):
